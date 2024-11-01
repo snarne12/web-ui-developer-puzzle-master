@@ -7,8 +7,9 @@ import { ReadingListItem } from '@tmo/shared/models';
 export const READING_LIST_FEATURE_KEY = 'readingList';
 
 export interface State extends EntityState<ReadingListItem> {
-  loaded: boolean;
-  error: null | string;
+  loaded?: boolean;
+  error?: null | string;
+  previousState?:EntityState<ReadingListItem> | null;
 }
 
 export interface ReadingListPartialState {
@@ -23,7 +24,8 @@ export const readingListAdapter: EntityAdapter<ReadingListItem> = createEntityAd
 
 export const initialState: State = readingListAdapter.getInitialState({
   loaded: false,
-  error: null
+  error: null,
+  previousState:null
 });
 
 const readingListReducer = createReducer(
@@ -47,12 +49,24 @@ const readingListReducer = createReducer(
       error: action.error
     };
   }),
-  on(ReadingListActions.addToReadingList, (state, action) =>
-    readingListAdapter.addOne({ bookId: action.book.id, ...action.book }, state)
-  ),
-  on(ReadingListActions.removeFromReadingList, (state, action) =>
-    readingListAdapter.removeOne(action.item.bookId, state)
-  )
+  on(ReadingListActions.addToReadingList, (state, action) => ({ 
+    ...readingListAdapter.addOne({ bookId: action.book.id, ...action.book }, state), 
+    previousState: { ...state } 
+  })),
+  on(ReadingListActions.removeFromReadingList, (state, action) => ({ 
+    ...readingListAdapter.removeOne(action.item.bookId, state),
+    previousState: { ...state } 
+  })),
+  on(ReadingListActions.undoLastAction, (state) => {
+    if (state.previousState) {
+      return {
+        ...state.previousState,
+        previousState: null 
+      };
+    }
+    return state;
+  })
+
 );
 
 export function reducer(state: State | undefined, action: Action) {
