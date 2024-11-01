@@ -45,3 +45,13 @@
   font-size: 1rem;
   color: $gray60;
 }
+
+.reading-list-item--details--finished {
+  display: flex;
+  align-items: center;
+  color: #4caf50;
+}
+
+.reading-list-item--cover {
+  opacity: 0.5; 
+}

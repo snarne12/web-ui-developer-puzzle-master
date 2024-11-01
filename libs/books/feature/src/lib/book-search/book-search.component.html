@@ -7,8 +7,8 @@
       placeholder="Search for books to add to your reading list"
       formControlName="term"
     />
-    <button mat-icon-button matSuffix>
-      <mat-icon>search</mat-icon>
+    <button matSuffix>
+      search
     </button>
   </mat-form-field>
 </form>
@@ -37,7 +37,7 @@
               (click)="addBookToReadingList(b)"
               [disabled]="b.isAdded"
             >
-              Want to Read
+              {{b.finished ? 'Finished': 'Want to Read'}}
             </button>
           </div>
         </div>

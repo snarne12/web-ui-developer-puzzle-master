@@ -52,7 +52,17 @@ const readingListReducer = createReducer(
   ),
   on(ReadingListActions.removeFromReadingList, (state, action) =>
     readingListAdapter.removeOne(action.item.bookId, state)
-  )
+  ),
+  on(ReadingListActions.markAsFinishedSuccess, (state, { item }) =>
+    readingListAdapter.updateOne(
+      { id: item.bookId, changes: { finished: true } },
+      state
+    )
+  ),
+  on(ReadingListActions.markAsFinishedError, (state, { item }) => ({
+    ...state,
+    error: `Failed to mark book as finished: ${item.bookId}`
+  }))
 );
 
 export function reducer(state: State | undefined, action: Action) {
