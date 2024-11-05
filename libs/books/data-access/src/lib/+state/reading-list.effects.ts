@@ -5,6 +5,8 @@ import { of } from 'rxjs';
 import { catchError, concatMap, exhaustMap, map } from 'rxjs/operators';
 import { ReadingListItem } from '@tmo/shared/models';
 import * as ReadingListActions from './reading-list.actions';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Store } from '@ngrx/store';
 
 @Injectable()
 export class ReadingListEffects implements OnInitEffects {
@@ -54,9 +56,42 @@ export class ReadingListEffects implements OnInitEffects {
     )
   );
 
+  showAddSnackbar$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(ReadingListActions.confirmedAddToReadingList),
+        map((action) => {
+          const snackbarRef = this.snackBar.open('Book added to reading list', 'Undo', {
+            duration: 3000
+          });
+          snackbarRef.onAction().subscribe(() => {
+            this.store.dispatch(ReadingListActions.undoLastAction()); // Dispatch undo if "Undo" is clicked
+          });
+        })
+      ),
+    { dispatch: false }
+  );
+
+
+  showRemoveSnackbar$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(ReadingListActions.confirmedRemoveFromReadingList),
+        map((action) => {
+          const snackbarRef = this.snackBar.open('Book removed from reading list', 'Undo', {
+            duration: 3000
+          });
+          snackbarRef.onAction().subscribe(() => {
+            this.store.dispatch(ReadingListActions.undoLastAction()); 
+           }); 
+          }) 
+        ), { dispatch: false } 
+      );
+
+
   ngrxOnInitEffects() {
     return ReadingListActions.init();
   }
 
-  constructor(private actions$: Actions, private http: HttpClient) {}
+  constructor(private actions$: Actions, private http: HttpClient,private store: Store, private snackBar: MatSnackBar) {}
 }
